@@ -7,11 +7,9 @@ pipeline {
         disableConcurrentBuilds()
         ansiColor('xterm')
     }
-    
-    
     environment{
         def appVersion = '' //variable declaration
-        //nexusUrl = 'nexus.narendra.shop:8081'
+        nexusUrl = 'nexus.daws78s.online:8081'
     }
     stages {
         stage('read the version'){
