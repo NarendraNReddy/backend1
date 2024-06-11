@@ -6,13 +6,13 @@ pipeline {
         timeout(time: 30, unit: 'MINUTES')
         disableConcurrentBuilds()
         ansiColor('xterm')
-
     }
+    
+    
     environment{
-        def appVersion = ''
+        def appVersion = '' //variable declaration
+        nexusUrl = 'nexus.narendra.shop:8081'
     }
-   
-
     stages {
         stage('read the version'){
             steps{
@@ -23,14 +23,13 @@ pipeline {
                 }
             }
         }
-        stage('Install dependencies') {
+        stage('Install Dependencies') {
             steps {
-                sh """
-                   npm install
-                   ls -ltr
-                   echo $appVersion
-                """
-
+               sh """
+                npm install
+                ls -ltr
+                echo "application version: $appVersion"
+               """
             }
         }
         stage('Build'){
@@ -40,13 +39,44 @@ pipeline {
                 ls -ltr
                 """
             }
-        }        
+        }
+
+        stage('Nexus Artifact Upload'){
+            steps{
+                script{
+                    nexusArtifactUploader(
+                        nexusVersion: 'nexus3',
+                        protocol: 'http',
+                        nexusUrl: "${nexusUrl}",
+                        groupId: 'com.expense',
+                        version: "${appVersion}",
+                        repository: "backend",
+                        credentialsId: 'nexus-auth',
+                        artifacts: [
+                            [artifactId: "backend" ,
+                            classifier: '',
+                            file: "backend-" + "${appVersion}" + '.zip',
+                            type: 'zip']
+                        ]
+                    )
+                }
+            }
+        }
+        stage('Deploy'){
+            steps{
+                script{
+                    def params = [
+                        string(name: 'appVersion', value: "${appVersion}")
+                    ]
+                    build job: 'backend-deploy', parameters: params, wait: false
+                }
+            }
+        }
     }
     post { 
         always { 
             echo 'I will always say Hello again!'
-            //deleteDir()
-
+            deleteDir()
         }
         success { 
             echo 'I will run when pipeline is success'
