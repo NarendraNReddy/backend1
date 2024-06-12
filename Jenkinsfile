@@ -9,7 +9,7 @@ pipeline {
     }
     environment{
         def appVersion = '' //variable declaration
-       // nexusUrl = 'nexus.daws78s.online:8081'
+        nexusUrl = 'nexus.daws78s.online:8081'
     }
     stages {
         stage('read the version'){
@@ -70,7 +70,7 @@ pipeline {
         //         }
         //     }
         // }
-   // }
+    }
     post { 
         always { 
             echo 'I will always say Hello again!'
